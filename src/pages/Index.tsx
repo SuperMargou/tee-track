@@ -8,6 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Switch } from '@/components/ui/switch';
 import AddItemModal from '@/components/AddItemModal';
 import ItemCard from '@/components/ItemCard';
+import LocationFilter from '@/components/LocationFilter';
 
 export type Location = "Dad's" | "Mom's" | "School" | "In Transit";
 
@@ -29,6 +30,7 @@ const Index = () => {
   const [todaySearchQuery, setTodaySearchQuery] = useState('');
   const [showAddModal, setShowAddModal] = useState(false);
   const [isFullInventoryMode, setIsFullInventoryMode] = useState(true);
+  const [selectedLocation, setSelectedLocation] = useState<Location | 'All'>('All');
 
   // Load items from localStorage on component mount
   useEffect(() => {
@@ -111,9 +113,10 @@ const Index = () => {
     return items.filter(item => {
       const matchesSearch = item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
                            item.description.toLowerCase().includes(searchQuery.toLowerCase());
+      const matchesLocation = selectedLocation === 'All' || item.location === selectedLocation;
       
       if (isFullInventoryMode) {
-        return matchesSearch;
+        return matchesSearch && matchesLocation;
       } else {
         // In Today mode, show only items marked for today
         return matchesSearch && item.forToday;
@@ -171,7 +174,15 @@ const Index = () => {
     if (isFullInventoryMode) {
       return (
         <div className="px-4 pb-24">
-          {/* Search Bar - Moved below filters */}
+          {/* Location Filter */}
+          <div className="mb-5 mt-2">
+            <LocationFilter 
+              selectedLocation={selectedLocation}
+              onLocationChange={setSelectedLocation}
+            />
+          </div>
+          
+          {/* Search Bar */}
           <div className="relative mb-4">
             <Search className="absolute left-7 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
             <Input
@@ -346,7 +357,7 @@ const Index = () => {
               <Package className="h-8 w-8 text-blue-600" />
               <h1 className="text-2xl font-bold text-gray-900">TeeTrack</h1>
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-4 ml-4">
               <span className="text-sm text-gray-600">Inventory</span>
               <Switch 
                 checked={!isFullInventoryMode}
@@ -385,3 +396,4 @@ const Index = () => {
 };
 
 export default Index;
+
