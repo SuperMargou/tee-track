@@ -3,7 +3,6 @@ import React from 'react';
 import { Trash2 } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { type Item, type Location } from '@/pages/Index';
 
 interface ItemCardProps {
@@ -71,25 +70,18 @@ const ItemCard: React.FC<ItemCardProps> = ({ item, onLocationChange, onDelete })
                 )}
               </div>
               
-              {/* Delete Option */}
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
-                  <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-48">
-                  <DropdownMenuItem 
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      onDelete(item.id);
-                    }}
-                    className="flex items-center gap-2 text-red-600 hover:text-red-700"
-                  >
-                    Delete
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
+              {/* Delete Option - Removed dropdown, direct delete now */}
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                className="h-8 w-8 p-0" 
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onDelete(item.id);
+                }}
+              >
+                <Trash2 className="h-4 w-4" />
+              </Button>
             </div>
 
             {/* Location indicator at the bottom */}

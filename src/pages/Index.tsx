@@ -27,6 +27,7 @@ export interface Item {
 const Index = () => {
   const [items, setItems] = useState<Item[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
+  const [todaySearchQuery, setTodaySearchQuery] = useState('');
   const [selectedLocation, setSelectedLocation] = useState<Location | 'All'>('All');
   const [showAddModal, setShowAddModal] = useState(false);
   const [isFullInventoryMode, setIsFullInventoryMode] = useState(true);
@@ -89,6 +90,24 @@ const Index = () => {
     ));
   };
 
+  // Auto-set items at school as reminders
+  useEffect(() => {
+    setItems(prev => prev.map(item => 
+      item.location === "School"
+        ? { ...item, reminder: true }
+        : item
+    ));
+  }, [items]);
+
+  // Auto-set "In Transit" items as forToday
+  useEffect(() => {
+    setItems(prev => prev.map(item => 
+      item.location === "In Transit"
+        ? { ...item, forToday: true }
+        : item
+    ));
+  }, [items]);
+
   // Filter items based on search, location, and mode
   const getFilteredItems = () => {
     return items.filter(item => {
@@ -105,9 +124,17 @@ const Index = () => {
     });
   };
 
-  // Get items that are marked as reminders
+  // Get items that are at school (for reminders)
   const getReminderItems = () => {
-    return items.filter(item => item.reminder);
+    return items.filter(item => item.location === "School");
+  };
+
+  // Filter items for the Today tab based on search
+  const getFilteredTodayItems = (itemsList: Item[]) => {
+    return itemsList.filter(item => 
+      item.name.toLowerCase().includes(todaySearchQuery.toLowerCase()) ||
+      item.description.toLowerCase().includes(todaySearchQuery.toLowerCase())
+    );
   };
 
   // Group items by location for display
@@ -151,7 +178,7 @@ const Index = () => {
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-3">
               <Package className="h-8 w-8 text-blue-600" />
-              <h1 className="text-2xl font-bold text-gray-900">My Belongings</h1>
+              <h1 className="text-2xl font-bold text-gray-900">TeeTrack</h1>
             </div>
             <div className="flex items-center gap-2">
               <span className="text-sm text-gray-600">{isFullInventoryMode ? 'All Items' : 'Today'}</span>
@@ -160,17 +187,6 @@ const Index = () => {
                 onCheckedChange={() => setIsFullInventoryMode(!isFullInventoryMode)}
               />
             </div>
-          </div>
-          
-          {/* Search Bar */}
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
-            <Input
-              placeholder="Search items..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10 h-12 text-lg"
-            />
           </div>
         </div>
       </div>
@@ -182,8 +198,27 @@ const Index = () => {
         </TabsList>
         
         <TabsContent value="inventory">
+          {/* Location Filter */}
+          <div className="px-4 mb-4">
+            <LocationFilter 
+              selectedLocation={selectedLocation}
+              onLocationChange={setSelectedLocation}
+            />
+          </div>
+
+          {/* Search Bar - Moved below filters */}
+          <div className="relative px-4 mb-4">
+            <Search className="absolute left-7 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
+            <Input
+              placeholder="Search items..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-10 h-12 text-lg"
+            />
+          </div>
+          
           {/* Quick Stats */}
-          <div className="px-4 py-4">
+          <div className="px-4 py-2">
             <div className="grid grid-cols-2 gap-3 mb-4">
               {(['Dad\'s', 'Mom\'s', 'School', 'In Transit'] as Location[]).map(location => (
                 <Card key={location} className={`cursor-pointer hover:shadow-md transition-shadow ${location === selectedLocation ? 'ring-2 ring-blue-500' : ''}`}
@@ -195,14 +230,6 @@ const Index = () => {
                 </Card>
               ))}
             </div>
-          </div>
-
-          {/* Location Filter */}
-          <div className="px-4 mb-4">
-            <LocationFilter 
-              selectedLocation={selectedLocation}
-              onLocationChange={setSelectedLocation}
-            />
           </div>
 
           {/* Items List */}
@@ -298,21 +325,21 @@ const Index = () => {
 
             {/* Reminders Section */}
             <div className="mt-8">
-              <h3 className="text-lg font-semibold text-gray-900 mb-3">Reminders</h3>
+              <h3 className="text-lg font-semibold text-gray-900 mb-3">Reminders (Items at School)</h3>
               {reminderItems.length === 0 ? (
-                <p className="text-gray-500">No reminders set</p>
+                <p className="text-gray-500">No items at school</p>
               ) : (
                 <div className="space-y-3">
                   {reminderItems.map(item => (
                     <Card 
                       key={item.id} 
-                      className="hover:shadow-md transition-shadow bg-yellow-50"
+                      className="hover:shadow-md transition-shadow bg-green-50"
                       onClick={() => toggleItemReminder(item.id)}
                     >
                       <CardContent className="p-4">
                         <div className="flex justify-between items-center">
-                          <h3 className="font-semibold text-yellow-800">{item.name}</h3>
-                          <div className="text-sm text-yellow-800">{item.location}</div>
+                          <h3 className="font-semibold text-green-800">{item.name}</h3>
+                          <div className="text-sm text-green-800">{item.location}</div>
                         </div>
                       </CardContent>
                     </Card>
@@ -324,8 +351,20 @@ const Index = () => {
             {/* Add Items to Today Section */}
             <div className="mt-8 pb-24">
               <h3 className="text-lg font-semibold text-gray-900 mb-3">Select items for today</h3>
+              
+              {/* Search Bar for Today Items */}
+              <div className="relative mb-4">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
+                <Input
+                  placeholder="Search items to add for today..."
+                  value={todaySearchQuery}
+                  onChange={(e) => setTodaySearchQuery(e.target.value)}
+                  className="pl-10 h-12 text-lg"
+                />
+              </div>
+              
               <div className="space-y-3">
-                {items.filter(item => !item.forToday).map(item => (
+                {getFilteredTodayItems(items.filter(item => !item.forToday)).map(item => (
                   <Card 
                     key={item.id} 
                     className="hover:shadow-md transition-shadow cursor-pointer opacity-60 hover:opacity-100"
@@ -350,7 +389,7 @@ const Index = () => {
         <Button
           size="lg"
           onClick={() => setShowAddModal(true)}
-          className="h-14 w-14 rounded-full shadow-lg hover:shadow-xl transition-shadow bg-blue-600 hover:bg-blue-700"
+          className="h-14 w-14 rounded-full shadow-lg hover:shadow-xl transition-shadow bg-green-100 text-green-800 hover:bg-green-200"
         >
           <Plus className="h-8 w-8" />
         </Button>
