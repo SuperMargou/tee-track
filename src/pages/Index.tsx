@@ -4,11 +4,13 @@ import { Search, Plus, Package, Calendar } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Switch } from '@/components/ui/switch';
+import { useAuth } from '@/contexts/AuthContext';
+import { useItems } from '@/hooks/useItems';
 import AddItemModal from '@/components/AddItemModal';
 import ItemCard from '@/components/ItemCard';
 import LocationFilter from '@/components/LocationFilter';
+import Header from '@/components/Header';
+import { useNavigate } from 'react-router-dom';
 
 export type Location = "Dad's" | "Mom's" | "School" | "In Transit";
 
@@ -25,88 +27,59 @@ export interface Item {
 }
 
 const Index = () => {
-  const [items, setItems] = useState<Item[]>([]);
+  const { user, loading: authLoading } = useAuth();
+  const { 
+    items, 
+    loading: itemsLoading, 
+    addItem, 
+    updateItemLocation, 
+    deleteItem, 
+    toggleItemForToday, 
+    toggleItemReminder 
+  } = useItems();
+  
   const [searchQuery, setSearchQuery] = useState('');
   const [todaySearchQuery, setTodaySearchQuery] = useState('');
   const [showAddModal, setShowAddModal] = useState(false);
   const [isFullInventoryMode, setIsFullInventoryMode] = useState(true);
   const [selectedLocation, setSelectedLocation] = useState<Location | 'All'>('All');
+  
+  const navigate = useNavigate();
 
-  // Load items from localStorage on component mount
   useEffect(() => {
-    const savedItems = localStorage.getItem('belongings-tracker-items');
-    if (savedItems) {
-      const parsedItems = JSON.parse(savedItems).map((item: any) => ({
-        ...item,
-        createdAt: new Date(item.createdAt),
-        updatedAt: new Date(item.updatedAt)
-      }));
-      setItems(parsedItems);
+    if (!authLoading && !user) {
+      navigate('/auth');
     }
-  }, []);
-
-  // Save items to localStorage whenever items change
-  useEffect(() => {
-    localStorage.setItem('belongings-tracker-items', JSON.stringify(items));
-  }, [items]);
-
-  const addItem = (newItem: Omit<Item, 'id' | 'createdAt' | 'updatedAt'>) => {
-    const item: Item = {
-      ...newItem,
-      id: Date.now().toString(),
-      createdAt: new Date(),
-      updatedAt: new Date(),
-      forToday: false,
-      reminder: false
-    };
-    setItems(prev => [item, ...prev]);
-  };
-
-  const updateItemLocation = (itemId: string, newLocation: Location) => {
-    setItems(prev => prev.map(item => 
-      item.id === itemId 
-        ? { ...item, location: newLocation, updatedAt: new Date() }
-        : item
-    ));
-  };
-
-  const deleteItem = (itemId: string) => {
-    setItems(prev => prev.filter(item => item.id !== itemId));
-  };
-
-  const toggleItemForToday = (itemId: string) => {
-    setItems(prev => prev.map(item =>
-      item.id === itemId
-        ? { ...item, forToday: !item.forToday, updatedAt: new Date() }
-        : item
-    ));
-  };
-
-  const toggleItemReminder = (itemId: string) => {
-    setItems(prev => prev.map(item =>
-      item.id === itemId
-        ? { ...item, reminder: !item.reminder, updatedAt: new Date() }
-        : item
-    ));
-  };
+  }, [user, authLoading, navigate]);
 
   // Auto-set items at school as reminders
   useEffect(() => {
-    setItems(prev => prev.map(item => 
-      item.location === "School"
-        ? { ...item, reminder: true }
-        : item
-    ));
+    items.forEach(item => {
+      if (item.location === "School" && !item.reminder) {
+        toggleItemReminder(item.id);
+      }
+    });
   }, [items]);
 
   // Auto-set "In Transit" items as forToday
   useEffect(() => {
-    setItems(prev => prev.map(item => 
-      item.location === "In Transit"
-        ? { ...item, forToday: true }
-        : item
-    ));
+    items.forEach(item => {
+      if (item.location === "In Transit" && !item.forToday) {
+        toggleItemForToday(item.id);
+      }
+    });
   }, [items]);
+
+  if (authLoading || !user) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <Package className="h-16 w-16 text-gray-300 mx-auto mb-4" />
+          <p className="text-gray-600">Loading...</p>
+        </div>
+      </div>
+    );
+  }
 
   // Filter items based on search, location, and mode
   const getFilteredItems = () => {
@@ -208,27 +181,33 @@ const Index = () => {
           </div>
 
           {/* Items List */}
-          <div className="space-y-3">
-            {Object.entries(itemsByLocation).map(([location, locationItems]) => (
-              <div key={location} className="mb-6">
-                <h3 className="text-lg font-semibold text-gray-900 mb-3">
-                  {location} ({locationItems.length})
-                </h3>
-                <div className="space-y-3">
-                  {locationItems.map(item => (
-                    <ItemCard
-                      key={item.id}
-                      item={item}
-                      onLocationChange={updateItemLocation}
-                      onDelete={deleteItem}
-                    />
-                  ))}
+          {itemsLoading ? (
+            <div className="text-center py-8">
+              <p className="text-gray-600">Loading items...</p>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {Object.entries(itemsByLocation).map(([location, locationItems]) => (
+                <div key={location} className="mb-6">
+                  <h3 className="text-lg font-semibold text-gray-900 mb-3">
+                    {location} ({locationItems.length})
+                  </h3>
+                  <div className="space-y-3">
+                    {locationItems.map(item => (
+                      <ItemCard
+                        key={item.id}
+                        item={item}
+                        onLocationChange={updateItemLocation}
+                        onDelete={deleteItem}
+                      />
+                    ))}
+                  </div>
                 </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          )}
 
-          {filteredItems.length === 0 && (
+          {filteredItems.length === 0 && !itemsLoading && (
             <Card className="text-center py-12">
               <CardContent>
                 <Package className="h-16 w-16 text-gray-300 mx-auto mb-4" />
@@ -271,7 +250,7 @@ const Index = () => {
               items.filter(item => item.forToday).map(item => (
                 <Card 
                   key={item.id} 
-                  className={`hover:shadow-md transition-shadow`}
+                  className={`hover:shadow-md transition-shadow cursor-pointer`}
                   onClick={() => toggleItemForToday(item.id)}
                 >
                   <CardContent className={`p-4 ${getLocationColor(item.location)}`}>
@@ -295,7 +274,7 @@ const Index = () => {
                 {reminderItems.map(item => (
                   <Card 
                     key={item.id} 
-                    className="hover:shadow-md transition-shadow bg-green-50"
+                    className="hover:shadow-md transition-shadow bg-green-50 cursor-pointer"
                     onClick={() => toggleItemReminder(item.id)}
                   >
                     <CardContent className="p-4">
@@ -350,24 +329,10 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
-      <div className="bg-white shadow-sm border-b">
-        <div className="max-w-md mx-auto px-4 py-4">
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center gap-3">
-              <Package className="h-8 w-8 text-blue-600" />
-              <h1 className="text-2xl font-bold text-gray-900">TeeTrack</h1>
-            </div>
-            <div className="flex items-center gap-4 ml-4">
-              <span className="text-sm text-gray-600">Inventory</span>
-              <Switch 
-                checked={!isFullInventoryMode}
-                onCheckedChange={() => setIsFullInventoryMode(!isFullInventoryMode)}
-              />
-              <span className="text-sm text-gray-600">Today</span>
-            </div>
-          </div>
-        </div>
-      </div>
+      <Header 
+        isFullInventoryMode={isFullInventoryMode}
+        setIsFullInventoryMode={setIsFullInventoryMode}
+      />
 
       {/* Main Content */}
       <div className="max-w-md mx-auto">
@@ -396,4 +361,3 @@ const Index = () => {
 };
 
 export default Index;
-
