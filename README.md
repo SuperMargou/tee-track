@@ -1,73 +1,38 @@
-# Welcome to your Lovable project
+# TeeTrack
 
-## Project info
+**TeeTrack** is a minimalist, modern inventory and school planning app built with Vite, React, and ShadCN UI. Designed primarily for mobile use, it helps you track what you own, what you're currently carrying, and what you need to bring to school.
 
-**URL**: https://lovable.dev/projects/372bcf50-9cbd-4eb9-ae0b-0f94c25ea7dd
+## Features
 
-## How can I edit this code?
+- **Inventory View**: Organize and manage all your belongings.
+- **Today View**: Select items you're taking with you today.
+- **Reminders Section**: Add school-related reminders and essentials.
+- **In Transit**: Keep track of the items currently with you.
+- **Search and Filter**: Quickly find specific items through live filtering.
+- **Visual Switch**: Easily toggle between Inventory and Today modes.
+- **Responsive Design**: Built for mobile-first use, clean and intuitive.
 
-There are several ways of editing your application.
+## Version
 
-**Use Lovable**
+**Current Version**: `v1.1.0-beta`
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/372bcf50-9cbd-4eb9-ae0b-0f94c25ea7dd) and start prompting.
+## Tech Stack
 
-Changes made via Lovable will be committed automatically to this repo.
+- [Vite](https://vitejs.dev/)
+- [React](https://reactjs.org/)
+- [ShadCN/UI](https://ui.shadcn.dev/)
+- [TypeScript](https://www.typescriptlang.org/)
 
-**Use your preferred IDE**
+## Keywords
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+`inventory`, `planner`, `react`, `vite`, `mobile app`, `pwa`, `school`, `reminder`, `todo`, `minimal`
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+## Contributing
 
-Follow these steps:
+Contributions are welcome! If you want to suggest improvements, fix bugs, or add features, feel free to fork the repo and open a pull request.
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+**We especially welcome help turning this app into a proper Progressive Web App (PWA)**. If you're experienced with PWA setup and service workers, your support would be amazing!
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+---
 
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
-```
-
-**Edit a file directly in GitHub**
-
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
-
-**Use GitHub Codespaces**
-
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
-
-## What technologies are used for this project?
-
-This project is built with:
-
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
-
-## How can I deploy this project?
-
-Simply open [Lovable](https://lovable.dev/projects/372bcf50-9cbd-4eb9-ae0b-0f94c25ea7dd) and click on Share -> Publish.
-
-## Can I connect a custom domain to my Lovable project?
-
-Yes, you can!
-
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
-
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
+Made with passion — if you're interested in helping out, you're very welcome!
