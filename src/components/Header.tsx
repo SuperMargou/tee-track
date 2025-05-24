@@ -17,17 +17,6 @@ const Header: React.FC<HeaderProps> = ({ isFullInventoryMode, setIsFullInventory
     await signOut();
   };
 
-  // Get user's display name from Google metadata, fallback to email if not available
-  const getUserDisplayName = () => {
-    if (user?.user_metadata?.full_name) {
-      return user.user_metadata.full_name;
-    }
-    if (user?.user_metadata?.name) {
-      return user.user_metadata.name;
-    }
-    return user?.email || 'User';
-  };
-
   return (
     <div className="bg-white shadow-sm border-b">
       <div className="max-w-md mx-auto px-4 py-4">
@@ -56,7 +45,7 @@ const Header: React.FC<HeaderProps> = ({ isFullInventoryMode, setIsFullInventory
         </div>
         {user && (
           <div className="text-sm text-gray-600">
-            Welcome back, {getUserDisplayName()}
+            Welcome back, {user.email}
           </div>
         )}
       </div>
