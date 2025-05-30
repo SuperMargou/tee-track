@@ -11,6 +11,7 @@ export type Database = {
     Tables: {
       items: {
         Row: {
+          category: string | null
           created_at: string
           description: string | null
           for_today: boolean | null
@@ -23,6 +24,7 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          category?: string | null
           created_at?: string
           description?: string | null
           for_today?: boolean | null
@@ -35,6 +37,7 @@ export type Database = {
           user_id: string
         }
         Update: {
+          category?: string | null
           created_at?: string
           description?: string | null
           for_today?: boolean | null
@@ -45,6 +48,27 @@ export type Database = {
           reminder?: boolean | null
           updated_at?: string
           user_id?: string
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id: string
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
+          updated_at?: string
         }
         Relationships: []
       }

@@ -1,13 +1,13 @@
 
 import React, { useState } from 'react';
-import { Camera, X, Upload } from 'lucide-react';
+import { X, Upload } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { type Item, type Location } from '@/pages/Index';
+import { type Item, type Location, type Category } from '@/types';
 
 interface AddItemModalProps {
   open: boolean;
@@ -19,7 +19,17 @@ const AddItemModal: React.FC<AddItemModalProps> = ({ open, onClose, onAdd }) => 
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
   const [location, setLocation] = useState<Location>("Dad's");
+  const [category, setCategory] = useState<Category>('t-shirts');
   const [photo, setPhoto] = useState<string | undefined>();
+
+  const categoryOptions: { value: Category; label: string }[] = [
+    { value: 'socks', label: 'Socks' },
+    { value: 'sweaters', label: 'Sweaters' },
+    { value: 't-shirts', label: 'T-Shirts' },
+    { value: 'pants', label: 'Pants' },
+    { value: 'shoes', label: 'Shoes' },
+    { value: 'other', label: 'Other' },
+  ];
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -29,6 +39,7 @@ const AddItemModal: React.FC<AddItemModalProps> = ({ open, onClose, onAdd }) => 
       name: name.trim(),
       description: description.trim(),
       location,
+      category,
       photo
     });
 
@@ -36,6 +47,7 @@ const AddItemModal: React.FC<AddItemModalProps> = ({ open, onClose, onAdd }) => 
     setName('');
     setDescription('');
     setLocation("Dad's");
+    setCategory('t-shirts');
     setPhoto(undefined);
     onClose();
   };
@@ -55,51 +67,39 @@ const AddItemModal: React.FC<AddItemModalProps> = ({ open, onClose, onAdd }) => 
     setPhoto(undefined);
   };
 
-  const getLocationColor = (loc: Location) => {
-    switch (loc) {
-      case "Dad's": return 'bg-blue-50 border-blue-200 text-blue-800';
-      case "Mom's": return 'bg-orange-50 border-orange-200 text-orange-800';
-      case "School": return 'bg-green-50 border-green-200 text-green-800';
-      case "In Transit": return 'bg-gray-50 border-gray-200 text-gray-800';
-    }
-  };
-
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-md mx-4">
+      <DialogContent className="w-[95vw] max-w-sm mx-auto max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle className="text-xl font-semibold">Add New Item</DialogTitle>
+          <DialogTitle className="text-lg font-semibold">Add New Item</DialogTitle>
         </DialogHeader>
         
-        <form onSubmit={handleSubmit} className="space-y-6">
-          {/* Photo Upload */}
+        <form onSubmit={handleSubmit} className="space-y-4">
+          {/* Photo Upload - Smaller for mobile */}
           <div className="space-y-2">
-            <Label>Photo (Optional)</Label>
+            <Label className="text-sm">Photo (Optional)</Label>
             {photo ? (
               <div className="relative">
                 <img 
                   src={photo} 
                   alt="Item preview" 
-                  className="w-full h-48 object-cover rounded-lg border"
+                  className="w-full h-32 object-cover rounded border"
                 />
                 <Button
                   type="button"
                   variant="destructive"
                   size="sm"
                   onClick={removePhoto}
-                  className="absolute top-2 right-2 h-8 w-8 p-0"
+                  className="absolute top-1 right-1 h-6 w-6 p-0"
                 >
-                  <X className="h-4 w-4" />
+                  <X className="h-3 w-3" />
                 </Button>
               </div>
             ) : (
-              <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center">
-                <Upload className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                <Label htmlFor="photo-upload" className="cursor-pointer">
-                  <span className="text-blue-600 hover:text-blue-700 font-medium">
-                    Upload a photo
-                  </span>
-                  <span className="text-gray-600"> or take one with your camera</span>
+              <div className="border-2 border-dashed border-gray-300 rounded p-4 text-center">
+                <Upload className="h-8 w-8 text-gray-400 mx-auto mb-2" />
+                <Label htmlFor="photo-upload" className="cursor-pointer text-sm">
+                  <span className="text-blue-600 hover:text-blue-700 font-medium">Upload photo</span>
                 </Label>
                 <input
                   id="photo-upload"
@@ -113,43 +113,60 @@ const AddItemModal: React.FC<AddItemModalProps> = ({ open, onClose, onAdd }) => 
             )}
           </div>
 
+          {/* Category Dropdown */}
+          <div className="space-y-2">
+            <Label className="text-sm">Category *</Label>
+            <Select value={category} onValueChange={(value: Category) => setCategory(value)}>
+              <SelectTrigger className="h-10">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {categoryOptions.map(option => (
+                  <SelectItem key={option.value} value={option.value}>
+                    {option.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
           {/* Item Name */}
           <div className="space-y-2">
-            <Label htmlFor="name">Item Name *</Label>
+            <Label htmlFor="name" className="text-sm">Item Name *</Label>
             <Input
               id="name"
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="e.g., Blue hoodie, Math textbook..."
-              className="h-12 text-lg"
+              className="h-10"
               required
             />
           </div>
 
           {/* Description */}
           <div className="space-y-2">
-            <Label htmlFor="description">Description</Label>
+            <Label htmlFor="description" className="text-sm">Description</Label>
             <Textarea
               id="description"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               placeholder="Any additional details..."
-              className="min-h-[80px] resize-none"
+              className="min-h-[60px] resize-none text-sm"
             />
           </div>
 
           {/* Location */}
           <div className="space-y-2">
-            <Label>Current Location</Label>
+            <Label className="text-sm">Current Location</Label>
             <Select value={location} onValueChange={(value: Location) => setLocation(value)}>
-              <SelectTrigger className="h-12">
+              <SelectTrigger className="h-10">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
                 {(['Dad\'s', 'Mom\'s', 'School', 'In Transit'] as Location[]).map(loc => (
                   <SelectItem key={loc} value={loc}>
                     <div className="flex items-center gap-2">
-                      <div className={`w-3 h-3 rounded-full ${
+                      <div className={`w-2 h-2 rounded-full ${
                         loc === "Dad's" ? 'bg-blue-500' :
                         loc === "Mom's" ? 'bg-orange-500' :
                         loc === "School" ? 'bg-green-500' : 'bg-gray-500'
@@ -163,19 +180,19 @@ const AddItemModal: React.FC<AddItemModalProps> = ({ open, onClose, onAdd }) => 
           </div>
 
           {/* Buttons */}
-          <div className="flex gap-3 pt-4">
+          <div className="flex gap-2 pt-2">
             <Button
               type="button"
               variant="outline"
               onClick={onClose}
-              className="flex-1 h-12"
+              className="flex-1 h-10 text-sm"
             >
               Cancel
             </Button>
             <Button
               type="submit"
               disabled={!name.trim()}
-              className="flex-1 h-12 bg-blue-600 hover:bg-blue-700"
+              className="flex-1 h-10 text-sm bg-blue-600 hover:bg-blue-700"
             >
               Add Item
             </Button>

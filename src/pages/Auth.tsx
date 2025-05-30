@@ -13,6 +13,7 @@ const Auth = () => {
   const [isLogin, setIsLogin] = useState(true);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [name, setName] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -46,7 +47,16 @@ const Auth = () => {
       if (isLogin) {
         result = await signIn(email, password);
       } else {
-        result = await signUp(email, password);
+        if (!name.trim()) {
+          toast({
+            title: "Error",
+            description: "Name is required",
+            variant: "destructive",
+          });
+          setLoading(false);
+          return;
+        }
+        result = await signUp(email, password, name.trim());
       }
 
       if (result.error) {
@@ -63,6 +73,7 @@ const Auth = () => {
         setIsLogin(true);
         setPassword('');
         setConfirmPassword('');
+        setName('');
       }
     } catch (error: any) {
       toast({
@@ -89,6 +100,20 @@ const Auth = () => {
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
+            {!isLogin && (
+              <div className="space-y-2">
+                <Label htmlFor="name">Name</Label>
+                <Input
+                  id="name"
+                  type="text"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  placeholder="Enter your name"
+                  required
+                />
+              </div>
+            )}
+            
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
               <Input
@@ -154,6 +179,7 @@ const Auth = () => {
                 setIsLogin(!isLogin);
                 setPassword('');
                 setConfirmPassword('');
+                setName('');
               }}
               className="text-sm"
             >

@@ -1,9 +1,8 @@
-
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
-import { type Item, type Location } from '@/pages/Index';
+import { type Item, type Location, type Category } from '@/types';
 
 export const useItems = () => {
   const [items, setItems] = useState<Item[]>([]);
@@ -32,6 +31,7 @@ export const useItems = () => {
         name: item.name,
         description: item.description || '',
         location: item.location as Location,
+        category: item.category as Category || 'other',
         photo: item.photo || undefined,
         forToday: item.for_today || false,
         reminder: item.reminder || false,
@@ -64,6 +64,7 @@ export const useItems = () => {
           name: newItem.name,
           description: newItem.description,
           location: newItem.location,
+          category: newItem.category,
           photo: newItem.photo,
           for_today: newItem.forToday,
           reminder: newItem.reminder,
@@ -78,6 +79,7 @@ export const useItems = () => {
         name: data.name,
         description: data.description || '',
         location: data.location as Location,
+        category: data.category as Category || 'other',
         photo: data.photo || undefined,
         forToday: data.for_today || false,
         reminder: data.reminder || false,

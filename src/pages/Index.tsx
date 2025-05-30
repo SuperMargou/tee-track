@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Search, Plus, Package, Calendar } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -11,20 +10,7 @@ import ItemCard from '@/components/ItemCard';
 import LocationFilter from '@/components/LocationFilter';
 import Header from '@/components/Header';
 import { useNavigate } from 'react-router-dom';
-
-export type Location = "Dad's" | "Mom's" | "School" | "In Transit";
-
-export interface Item {
-  id: string;
-  name: string;
-  description: string;
-  location: Location;
-  photo?: string;
-  createdAt: Date;
-  updatedAt: Date;
-  forToday?: boolean;
-  reminder?: boolean;
-}
+import { type Location, type Item, type Category } from '@/types';
 
 const Index = () => {
   const { user, loading: authLoading } = useAuth();
@@ -121,6 +107,18 @@ const Index = () => {
     }, {} as Record<Location, Item[]>);
   };
 
+  // Group items by category for Today mode
+  const getItemsByCategory = (filteredItems: Item[]) => {
+    const categoryOrder: Category[] = ['socks', 'sweaters', 't-shirts', 'pants', 'shoes', 'other'];
+    return categoryOrder.reduce((acc, category) => {
+      const categoryItems = filteredItems.filter(item => item.category === category);
+      if (categoryItems.length > 0) {
+        acc[category] = categoryItems;
+      }
+      return acc;
+    }, {} as Record<Category, Item[]>);
+  };
+
   const getLocationColor = (location: Location) => {
     switch (location) {
       case "Dad's": return 'bg-blue-100 text-blue-800';
@@ -155,14 +153,14 @@ const Index = () => {
             />
           </div>
           
-          {/* Search Bar */}
+          {/* Search Bar - Fixed spacing */}
           <div className="relative mb-4">
-            <Search className="absolute left-7 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
             <Input
               placeholder="Search items..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10 h-12 text-lg"
+              className="pl-12 h-12 text-lg"
             />
           </div>
           
@@ -231,7 +229,10 @@ const Index = () => {
         </div>
       );
     } else {
-      // Today mode content
+      // Today mode content - with category sorting
+      const todayItems = items.filter(item => item.forToday);
+      const todayItemsByCategory = getItemsByCategory(todayItems);
+
       return (
         <div className="px-4 py-4">
           <div className="flex items-center justify-between mb-4">
@@ -241,25 +242,30 @@ const Index = () => {
             </h2>
           </div>
 
-          {/* Today's Items List */}
-          <div className="mb-6 space-y-3">
+          {/* Today's Items List - Sorted by Category */}
+          <div className="mb-6 space-y-4">
             <h3 className="text-lg font-semibold text-gray-900">Taking With Me</h3>
-            {items.filter(item => item.forToday).length === 0 ? (
+            {Object.keys(todayItemsByCategory).length === 0 ? (
               <p className="text-gray-500">No items selected for today</p>
             ) : (
-              items.filter(item => item.forToday).map(item => (
-                <Card 
-                  key={item.id} 
-                  className={`hover:shadow-md transition-shadow cursor-pointer`}
-                  onClick={() => toggleItemForToday(item.id)}
-                >
-                  <CardContent className={`p-4 ${getLocationColor(item.location)}`}>
-                    <div className="flex justify-between items-center">
-                      <h3 className="font-semibold">{item.name}</h3>
-                      <div className="text-sm">{item.location}</div>
-                    </div>
-                  </CardContent>
-                </Card>
+              Object.entries(todayItemsByCategory).map(([category, categoryItems]) => (
+                <div key={category} className="space-y-2">
+                  <h4 className="text-sm font-medium text-gray-700 capitalize">{category}</h4>
+                  {categoryItems.map(item => (
+                    <Card 
+                      key={item.id} 
+                      className="hover:shadow-md transition-shadow cursor-pointer"
+                      onClick={() => toggleItemForToday(item.id)}
+                    >
+                      <CardContent className={`p-3 ${getLocationColor(item.location)}`}>
+                        <div className="flex justify-between items-center">
+                          <h3 className="font-semibold text-sm">{item.name}</h3>
+                          <div className="text-xs">{item.location}</div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
               ))
             )}
           </div>

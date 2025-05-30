@@ -11,7 +11,7 @@ interface HeaderProps {
 }
 
 const Header: React.FC<HeaderProps> = ({ isFullInventoryMode, setIsFullInventoryMode }) => {
-  const { user, signOut } = useAuth();
+  const { userProfile, signOut } = useAuth();
 
   const handleSignOut = async () => {
     await signOut();
@@ -43,9 +43,9 @@ const Header: React.FC<HeaderProps> = ({ isFullInventoryMode, setIsFullInventory
             </Button>
           </div>
         </div>
-        {user && (
+        {userProfile && (
           <div className="text-sm text-gray-600">
-            Welcome back, {user.email}
+            Welcome back, {userProfile.name}
           </div>
         )}
       </div>
