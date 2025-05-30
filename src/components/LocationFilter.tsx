@@ -1,7 +1,6 @@
-
 import React from 'react';
 import { Button } from '@/components/ui/button';
-import { type Location } from '@/pages/Index';
+import { type Location } from '@/types';
 
 interface LocationFilterProps {
   selectedLocation: Location | 'All';

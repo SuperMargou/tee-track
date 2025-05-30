@@ -2,12 +2,14 @@ import React from 'react';
 import { Trash2 } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { type Item, type Location } from '@/pages/Index';
+import { type Item, type Location } from '@/types';
+
 interface ItemCardProps {
   item: Item;
   onLocationChange: (itemId: string, newLocation: Location) => void;
   onDelete: (itemId: string) => void;
 }
+
 const ItemCard: React.FC<ItemCardProps> = ({
   item,
   onLocationChange,
